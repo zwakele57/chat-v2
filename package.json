@@ -37,5 +37,12 @@
     "@types/react": "~18.3.12",
     "typescript": "~5.3.3"
   },
-  "private": true
+  "private": true,
+  "description": "Chatting-app",
+  "directories": {
+    "lib": "lib"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
 }
