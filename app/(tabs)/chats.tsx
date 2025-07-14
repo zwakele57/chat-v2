@@ -8,7 +8,7 @@ import {
   TextInput,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search, MessageCircle, VolumeX, MoreVertical } from 'lucide-react-native';
+import { Search, MessageCircle, VolumeX, MoveVertical as MoreVertical } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface PrivateChat {
