@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -6,13 +6,10 @@ import {
   FlatList,
   TouchableOpacity,
   TextInput,
-  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Search, MessageCircle, VolumeX, Volume2, MoveVertical as MoreVertical } from 'lucide-react-native';
+import { Search, MessageCircle, VolumeX, MoreVertical } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { supabase } from '@/lib/supabase';
-import { useAuth } from '@/hooks/useAuth';
 
 interface PrivateChat {
   id: string;
@@ -30,7 +27,6 @@ interface PrivateChat {
 }
 
 export default function ChatsScreen() {
-  const { user } = useAuth();
   const [chats, setChats] = useState<PrivateChat[]>([
     {
       id: '1',
@@ -65,27 +61,6 @@ export default function ChatsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [userCredits, setUserCredits] = useState(85);
 
-  useEffect(() => {
-    loadPrivateChats();
-  }, []);
-
-  const loadPrivateChats = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('private_chats')
-        .select(`
-          *,
-          user1:profiles!private_chats_user1_id_fkey(username, avatar),
-          user2:profiles!private_chats_user2_id_fkey(username, avatar)
-        `)
-        .or(`user1_id.eq.${user?.id},user2_id.eq.${user?.id}`);
-
-      if (error) throw error;
-      // Process the data here when available
-    } catch (error) {
-      console.error('Error loading chats:', error);
-    }
-  };
   const filteredChats = chats.filter(chat =>
     chat.otherUser.username.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -99,7 +74,6 @@ export default function ChatsScreen() {
   };
 
   const formatTime = (timeString: string) => {
-    // This would normally parse the actual timestamp
     return timeString;
   };
 

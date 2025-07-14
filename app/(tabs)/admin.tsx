@@ -10,7 +10,7 @@ import {
   Modal,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Shield, TriangleAlert as AlertTriangle, Users, DollarSign, Eye, Ban, CircleCheck as CheckCircle, Gift } from 'lucide-react-native';
+import { Shield, AlertTriangle, Users, DollarSign, Eye, Ban, CheckCircle, Gift } from 'lucide-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 interface Report {

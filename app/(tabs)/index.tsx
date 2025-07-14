@@ -8,7 +8,6 @@ import {
   TextInput,
   Alert,
   Modal,
-  FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Mic, Heart, MessageSquare, Flag, Plus, Filter, Calendar, Clock } from 'lucide-react-native';
@@ -45,7 +44,37 @@ interface Category {
 export default function ConfessionsScreen() {
   const { user } = useAuth();
   const [confessions, setConfessions] = useState<Confession[]>([
-    // Sample data - will be replaced with real data from Supabase
+    // Sample data for testing
+    {
+      id: '1',
+      user_id: 'sample-user',
+      username: 'TestUser123',
+      content: 'This is a sample confession to test the app functionality. It shows how confessions will look in the app.',
+      category: 'work',
+      has_audio: false,
+      audio_url: null,
+      likes: 15,
+      dislikes: 2,
+      comments: 8,
+      created_at: new Date().toISOString(),
+      user_credits: 120,
+      user_verified: true,
+    },
+    {
+      id: '2',
+      user_id: 'sample-user-2',
+      username: 'AnotherUser456',
+      content: 'Another sample confession with different content to show variety in the feed.',
+      category: 'relationships',
+      has_audio: true,
+      audio_url: null,
+      likes: 8,
+      dislikes: 1,
+      comments: 3,
+      created_at: new Date(Date.now() - 3600000).toISOString(),
+      user_credits: 85,
+      user_verified: false,
+    }
   ]);
   
   const [categories, setCategories] = useState<Category[]>([
@@ -58,124 +87,33 @@ export default function ConfessionsScreen() {
   ]);
 
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showCategoryModal, setShowCategoryModal] = useState(false);
   const [newConfession, setNewConfession] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedPostCategory, setSelectedPostCategory] = useState('work');
   const [userCredits, setUserCredits] = useState(85);
 
-  useEffect(() => {
-    loadConfessions();
-    loadCategories();
-  }, [selectedCategory]);
-
-  const loadConfessions = async () => {
-    try {
-      let query = supabase
-        .from('confessions')
-        .select(`
-          *,
-          profiles (
-            username,
-            credits,
-            is_verified
-          )
-        `)
-        .order('created_at', { ascending: false });
-
-      if (selectedCategory !== 'all') {
-        query = query.eq('category', selectedCategory);
-      }
-
-      const { data, error } = await query;
-      if (error) throw error;
-
-      const formattedConfessions = data?.map(confession => ({
-        id: confession.id,
-        user_id: confession.user_id,
-        username: confession.profiles?.username || 'Anonymous',
-        content: confession.content,
-        category: confession.category,
-        has_audio: confession.has_audio,
-        audio_url: confession.audio_url,
-        likes: confession.likes,
-        dislikes: confession.dislikes,
-        comments: confession.comments,
-        created_at: confession.created_at,
-        user_credits: confession.profiles?.credits || 0,
-        user_verified: confession.profiles?.is_verified || false,
-      })) || [];
-
-      setConfessions(formattedConfessions);
-    } catch (error) {
-      console.error('Error loading confessions:', error);
-      // Add sample data for testing if database is empty
-      setConfessions([
-        {
-          id: '1',
-          user_id: 'sample-user',
-          username: 'TestUser123',
-          content: 'This is a sample confession to test the app functionality.',
-          category: 'work',
-          has_audio: false,
-          audio_url: null,
-          likes: 15,
-          dislikes: 2,
-          comments: 8,
-          created_at: new Date().toISOString(),
-          user_credits: 120,
-          user_verified: true,
-        }
-      ]);
-    }
-  };
-
-  const loadCategories = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .eq('is_active', true)
-        .order('name');
-
-      if (error) throw error;
-      if (data) {
-        setCategories([
-          { id: 'all', name: 'All', description: 'All confessions', icon: '📝', color: '#8b5cf6', is_active: true },
-          ...data
-        ]);
-      }
-    } catch (error) {
-      console.error('Error loading categories:', error);
-    }
-  };
   const handleCreateConfession = () => {
     if (newConfession.trim()) {
-      createConfession();
+      const newConf: Confession = {
+        id: Date.now().toString(),
+        user_id: user?.id || 'anonymous',
+        username: 'You',
+        content: newConfession,
+        category: selectedPostCategory,
+        has_audio: false,
+        likes: 0,
+        dislikes: 0,
+        comments: 0,
+        created_at: new Date().toISOString(),
+        user_credits: userCredits,
+        user_verified: false,
+      };
+      
+      setConfessions(prev => [newConf, ...prev]);
       setNewConfession('');
       setShowCreateModal(false);
     }
   };
-
-  const createConfession = async () => {
-    try {
-      const { error } = await supabase
-        .from('confessions')
-        .insert({
-          user_id: user?.id!,
-          content: newConfession,
-          category: selectedPostCategory,
-          has_audio: false,
-        });
-
-      if (error) throw error;
-      loadConfessions();
-    } catch (error) {
-      console.error('Error creating confession:', error);
-      Alert.alert('Error', 'Failed to create confession');
-    }
-  };
-
 
   const formatDateTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -200,6 +138,10 @@ export default function ConfessionsScreen() {
     const category = categories.find(c => c.id === categoryId);
     return category?.icon || '📝';
   };
+
+  const filteredConfessions = selectedCategory === 'all' 
+    ? confessions 
+    : confessions.filter(c => c.category === selectedCategory);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -233,17 +175,17 @@ export default function ConfessionsScreen() {
             </TouchableOpacity>
           ))}
         </ScrollView>
-        <TouchableOpacity style={styles.filterButton} onPress={() => setShowCategoryModal(true)}>
+        <TouchableOpacity style={styles.filterButton}>
           <Filter size={20} color="#8b5cf6" />
         </TouchableOpacity>
       </View>
 
       <ScrollView style={styles.content}>
-        {confessions.map((confession) => (
+        {filteredConfessions.map((confession) => (
           <View key={confession.id} style={styles.confessionCard}>
             <View style={styles.confessionHeader}>
               <View style={styles.userInfo}>
-                <Text style={styles.categoryBadge} style={[styles.categoryBadge, { backgroundColor: getCategoryColor(confession.category) }]}>
+                <Text style={[styles.categoryBadge, { backgroundColor: getCategoryColor(confession.category) }]}>
                   {getCategoryIcon(confession.category)}
                 </Text>
                 <View style={styles.userDetails}>
@@ -462,6 +404,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
+    textAlign: 'center',
+    lineHeight: 32,
+    fontSize: 16,
   },
   userDetails: {
     flex: 1,
