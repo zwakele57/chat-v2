@@ -1,9 +1,12 @@
 const { getDefaultConfig } = require('expo/metro-config');
+const path = require('path');
 
 const config = getDefaultConfig(__dirname);
 
-// Enable symlinks and proper module resolution for TypeScript files
-config.resolver.unstable_enableSymlinks = true;
-config.resolver.unstable_conditionNames = ['browser', 'module', 'main'];
+// Add explicit node modules path for expo-modules-core
+config.resolver.nodeModulesPaths = [
+  path.resolve(__dirname, 'node_modules/expo-modules-core'),
+  ...config.resolver.nodeModulesPaths || []
+];
 
 module.exports = config;
