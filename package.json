@@ -1,5 +1,5 @@
 {
-  "name": "anonymous-chat-expo",
+  "name": "anonymous-chat-app",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
@@ -28,8 +28,7 @@
     "react-native-gesture-handler": "~2.20.2",
     "react-native-reanimated": "~3.16.1",
     "react-native-svg": "15.8.0",
-    "react-native-url-polyfill": "^2.0.0",
-    "@react-native-async-storage/async-storage": "^2.2.0",
+    "@react-native-async-storage/async-storage": "^2.1.0",
     "@supabase/supabase-js": "^2.51.0",
     "lucide-react-native": "^0.475.0"
   },
